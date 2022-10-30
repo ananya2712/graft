@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net"
+	"net/http"
+	"net/rpc"
 	"time"
 )
 
@@ -11,30 +15,66 @@ const (
 	Leader    int = 2
 )
 
-type Node struct {
-	state      int
-	nodeId     int
-	currTerm   int
-	currLeader int
-	heartbeat  bool
+type RPCArguments struct {
+	nodeId bool
+	hello  string
 }
 
-func NodeConstructor(nodeId int) Node {
+type LogRecord struct {
+	logId    int
+	logValue int
+}
+
+type Node struct {
+	state            int
+	peerList         []int
+	nodeId           int
+	currTerm         int
+	currLeader       int
+	heartbeat        bool
+	heartbeatTimeout int
+	running          bool
+	numServers       int
+	log              []LogRecord
+}
+
+func NodeConstructor(nodeId int, heartBeat int, peerList []int) Node {
 	var node Node
 	node.state = Follower
 	node.nodeId = nodeId
 	node.currLeader = 0
 	node.currTerm = 0
 	node.heartbeat = false
+	node.heartbeatTimeout = heartBeat
+	node.running = true
+	node.peerList = peerList
+	node.numServers = len(peerList)
 	return node
+}
+
+func (node *Node) CloseServer(args *int, reply *int) error {
+	node.running = false
+	fmt.Println("SERVER CLOSED")
+	return nil
+}
+
+func (node *Node) runRPCListener() {
+	rpc.Register(node)
+	rpc.HandleHTTP()
+	listener, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.Serve(listener, nil)
 }
 
 func (node *Node) runStateMachine() {
 	lastSetTime := time.Now()
-	for {
+	node.runRPCListener()
+	for node.running {
 		if node.state == Follower {
-			if time.Since(lastSetTime) >= time.Second*3 {
-				fmt.Println("inside")
+			if time.Since(lastSetTime) >= time.Second*time.Duration(node.heartbeatTimeout) {
+				//fmt.Println("inside")
 				if !node.heartbeat {
 					node.state = Candidate
 					fmt.Println(node.nodeId, " is a candidate")
