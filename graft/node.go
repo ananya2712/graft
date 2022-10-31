@@ -36,6 +36,8 @@ type Node struct {
 	running          bool
 	numServers       int
 	log              []LogRecord
+	voteFor          int
+	voteCount        int
 }
 
 func NodeConstructor(nodeId int, heartBeat int, peerList []int) Node {
