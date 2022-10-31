@@ -1,23 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/rpc"
 	"strconv"
 )
 
-type heartBeatArgs struct {
+type HeartBeatArgs struct {
 	CurrLeader int
 	CurrTerm   int
 }
 
-type heartBeatReply struct {
+type HeartBeatReply struct {
 	Success bool
 	NodeId  int
 }
 
 func (node *Node) broadcastHeartBeat() {
-	var args = heartBeatArgs{
+	var args = HeartBeatArgs{
 		CurrLeader: node.nodeId,
 		CurrTerm:   node.currTerm,
 	}
@@ -25,13 +26,14 @@ func (node *Node) broadcastHeartBeat() {
 
 	for i := range node.peerList {
 		go func(i int) {
-			var reply heartBeatReply
-			node.sendHeartBeat(i, args, &reply)
+			var reply HeartBeatReply
+			node.sendHeartBeat(node.peerList[i], args, &reply)
 		}(i)
 	}
 }
 
-func (node *Node) HeartBeat(args *heartBeatArgs, reply *heartBeatReply) error {
+func (node *Node) HeartBeat(args *HeartBeatArgs, reply *HeartBeatReply) error {
+	fmt.Println("Heartbeat receieved!", node.nodeId, " from ", args.CurrLeader, " ", args.CurrTerm)
 	reply.NodeId = node.nodeId
 	if args.CurrLeader == node.currLeader && args.CurrTerm == node.currTerm {
 		node.heartbeat = true
@@ -43,11 +45,15 @@ func (node *Node) HeartBeat(args *heartBeatArgs, reply *heartBeatReply) error {
 	return nil
 }
 
-func (node *Node) sendHeartBeat(port int, args heartBeatArgs, reply *heartBeatReply) {
-	client, err := rpc.DialHTTP("tcp", "localhost:"+strconv.Itoa(port))
+func (node *Node) sendHeartBeat(port int, args HeartBeatArgs, reply *HeartBeatReply) {
+	client, err := rpc.Dial("tcp", "localhost:"+strconv.Itoa(port))
+	//fmt.Println("Sending heartbeat from ", node.nodeId)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
 	defer client.Close()
-	client.Call("Node.HeartBeat", args, reply)
+	err = client.Call("Node.HeartBeat", args, reply)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

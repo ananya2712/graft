@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"net/rpc"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -40,13 +40,14 @@ type Node struct {
 	log              []LogRecord
 	voteFor          int
 	voteCount        int
+	lock             sync.Mutex
 }
 
 func NodeConstructor(nodeId int, heartBeat int, peerList []int) Node {
 	var node Node
 	node.state = Follower
 	node.nodeId = nodeId
-	node.currLeader = 0
+	node.currLeader = -1
 	node.currTerm = 0
 	node.heartbeat = false
 	node.heartbeatTimeout = heartBeat
@@ -55,6 +56,7 @@ func NodeConstructor(nodeId int, heartBeat int, peerList []int) Node {
 	node.numServers = len(peerList)
 	node.voteFor = -1
 	node.voteCount = 0
+	node.leaderChan = make(chan bool)
 	return node
 }
 
@@ -67,13 +69,17 @@ func (node *Node) CloseServer(args *int, reply *int) error {
 func (node *Node) runRPCListener() {
 	srv := rpc.NewServer()
 	srv.Register(node)
-	srv.HandleHTTP("/_goRPC_"+strconv.Itoa(node.peerList[node.nodeId-1]), "/debug/rpc"+strconv.Itoa(node.peerList[node.nodeId-1]))
 	//fmt.Println(":" + strconv.Itoa(node.peerList[node.nodeId-1]))
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(node.peerList[node.nodeId-1]))
 	if err != nil {
 		log.Fatal(err)
 	}
-	go http.Serve(listener, nil)
+	go func() {
+		for node.running {
+			//fmt.Println("listening", node.nodeId)
+			srv.Accept(listener)
+		}
+	}()
 }
 
 func (node *Node) runStateMachine() {
@@ -81,6 +87,7 @@ func (node *Node) runStateMachine() {
 	//fmt.Println(node.peerList)
 	node.runRPCListener()
 	for node.running {
+		//fmt.Println(node.nodeId, " node in new iter")
 		if node.state == Follower {
 			if time.Since(lastSetTime) >= time.Second*time.Duration(node.heartbeatTimeout) {
 				//fmt.Println("inside")
@@ -105,13 +112,14 @@ func (node *Node) runStateMachine() {
 			case <-time.After(4 * time.Second):
 				node.state = Follower
 			case <-node.leaderChan:
+				fmt.Println("leader channel recieved ", node.nodeId)
 				node.currTerm++
 				fmt.Printf("Node %d is elected leader\n", node.nodeId)
+				node.state = Leader
 			}
 
 		}
 		if node.state == Leader {
-			//fmt.Println(node.nodeId, " is leader")
 			if time.Since(lastSetTime) >= time.Second*time.Duration(node.heartbeatTimeout/2) {
 				lastSetTime = time.Now()
 				node.broadcastHeartBeat()

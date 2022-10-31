@@ -17,46 +17,61 @@ type VoteReply struct {
 	Granted  bool
 }
 
+type NewLeaderArgs struct {
+	LeaderId int
+	Term     int
+}
+
+func (node *Node) NewLeader(args *NewLeaderArgs, reply *int) {
+	node.lock.Lock()
+	node.state = Follower
+	node.currLeader = args.LeaderId
+	node.currTerm = args.Term
+	node.lock.Unlock()
+}
+
 func (node *Node) RequestVoteRes(args VoteReqArgs, reply *VoteReply) error {
 	fmt.Println(node.nodeId, args.NodeId, args.Term, node.currTerm, node.voteFor)
 	if args.Term < node.currTerm {
-		fmt.Println("Inside cond 1")
+		//fmt.Println("Inside cond 1")
 		reply.CurrTerm = node.currTerm
 		reply.Granted = false
 		return nil
+	} else {
+		node.lock.Lock()
+		node.state = Follower
+		node.lock.Unlock()
 	}
 
 	if node.voteFor == -1 {
-		fmt.Println("Inside cond 2")
+		//fmt.Println("Inside cond 2")
+		node.lock.Lock()
 		node.currTerm = args.Term
 		node.voteFor = args.NodeId
 		reply.CurrTerm = node.currTerm
 		reply.Granted = true
+		node.lock.Unlock()
 	}
 
 	return nil
 }
 
 func (node *Node) sendVoteReq(port int, args VoteReqArgs, reply *VoteReply) {
-
-	client, err := rpc.DialHTTP("tcp", "localhost:"+strconv.Itoa(port))
+	client, err := rpc.Dial("tcp", "localhost:"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
 	defer client.Close()
-
 	err = client.Call("Node.RequestVoteRes", args, reply)
-
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Println("reply")
-	fmt.Println(reply)
-
 	if reply.Granted {
 		node.voteCount++
+		fmt.Println(node.nodeId, " votes:", node.voteCount)
 		if node.voteCount >= len(node.peerList)/2+1 {
+			fmt.Println("Leader possible ", node.nodeId)
 			node.leaderChan <- true
 			node.voteCount = 0
 		}

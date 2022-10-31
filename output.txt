@@ -1,0 +1,190 @@
+3  is a candidate
+3  is requesting votes
+1  is a candidate
+1  is requesting votes
+2  is a candidate
+2  is requesting votes
+1 3 1 0 1
+1 2 1 0 1
+3 2 1 0 3
+2 3 1 0 2
+2 1 1 0 2
+3 3 1 1 2
+3 1 1 1 3
+2  votes: 2
+Leader possible  2
+3  votes: 2
+Leader possible  3
+1 1 1 0 1
+2 2 1 0 2
+leader channel recieved  3
+Node 3 is elected leader
+leader channel recieved  2
+Node 2 is elected leader
+1  votes: 2
+Leader possible  1
+2  votes: 1
+leader channel recieved  1
+Node 1 is elected leader
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 2  from  1   1
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  3   2
+Heartbeat receieved! 3  from  1   1
+Heartbeat receieved! 1  from  3   2
+Heartbeat receieved! 3  from  3   2
+Heartbeat receieved! 2  from  2   2
+Heartbeat receieved! 1  from  1   1
+Heartbeat receieved! 3  from  2   2
+Heartbeat receieved! 1  from  2   2
+Heartbeat receieved! 2  from  1   1
