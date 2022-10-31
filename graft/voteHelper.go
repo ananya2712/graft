@@ -1,5 +1,11 @@
 package main
 
+import (
+	"log"
+	"net/rpc"
+	"strconv"
+)
+
 type VoteReqArgs struct {
 	term        int
 	candidateId int
@@ -19,12 +25,16 @@ func (node *Node) broadcastVoteRequest() {
 
 	for i := range node.peerList {
 		go func(i int) {
-			//var reply VoteReply
-			//node.sendRequestVote(i, args, &reply)
+			var reply VoteReply
+			node.sendRequestVote(i, args, &reply)
 		}(i)
 	}
 }
 
 func (node *Node) sendRequestVote(port int, args VoteReqArgs, reply *VoteReply) {
-
+	client, err := rpc.DialHTTP("tcp", "localhost:"+strconv.Itoa(port))
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
 }
