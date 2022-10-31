@@ -7,20 +7,19 @@ import (
 )
 
 type heartBeatArgs struct {
-	id         int
-	currLeader int
+	CurrLeader int
+	CurrTerm   int
 }
 
 type heartBeatReply struct {
-	success   bool
-	id        int
-	nextIndex int
+	Success bool
+	NodeId  int
 }
 
 func (node *Node) broadcastHeartBeat() {
 	var args = heartBeatArgs{
-		id:         node.nodeId,
-		currLeader: node.currLeader,
+		CurrLeader: node.nodeId,
+		CurrTerm:   node.currTerm,
 	}
 	_ = args
 
@@ -32,6 +31,18 @@ func (node *Node) broadcastHeartBeat() {
 	}
 }
 
+func (node *Node) HeartBeat(args *heartBeatArgs, reply *heartBeatReply) error {
+	reply.NodeId = node.nodeId
+	if args.CurrLeader == node.currLeader && args.CurrTerm == node.currTerm {
+		node.heartbeat = true
+		reply.Success = true
+	} else {
+		node.heartbeat = false
+		reply.Success = false
+	}
+	return nil
+}
+
 func (node *Node) sendHeartBeat(port int, args heartBeatArgs, reply *heartBeatReply) {
 	client, err := rpc.DialHTTP("tcp", "localhost:"+strconv.Itoa(port))
 	if err != nil {
@@ -39,12 +50,4 @@ func (node *Node) sendHeartBeat(port int, args heartBeatArgs, reply *heartBeatRe
 	}
 	defer client.Close()
 	client.Call("Node.HeartBeat", args, reply)
-
-	if reply.success {
-		node.heartbeat = true
-	} else {
-		node.heartbeat = false
-		node.state = Follower
-	}
-	//incomplete - need to handle nextIndex
 }

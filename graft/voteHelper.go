@@ -1,37 +1,43 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/rpc"
 	"strconv"
 )
 
 type VoteReqArgs struct {
-	term        int
-	candidateId int
+	Term   int
+	NodeId int
 }
 
 type VoteReply struct {
-	currTerm int
-	granted  bool
+	CurrTerm int
+	Granted  bool
 }
 
-func (node *Node) broadcastVoteRequest() {
-	var args = VoteReqArgs{
-		term:        node.currTerm,
-		candidateId: node.nodeId,
+func (node *Node) RequestVoteRes(args VoteReqArgs, reply *VoteReply) error {
+	fmt.Println(node.nodeId, args.NodeId, args.Term, node.currTerm, node.voteFor)
+	if args.Term < node.currTerm {
+		fmt.Println("Inside cond 1")
+		reply.CurrTerm = node.currTerm
+		reply.Granted = false
+		return nil
 	}
-	_ = args
 
-	for i := range node.peerList {
-		go func(i int) {
-			var reply VoteReply
-			node.sendRequestVote(i, args, &reply)
-		}(i)
+	if node.voteFor == -1 {
+		fmt.Println("Inside cond 2")
+		node.currTerm = args.Term
+		node.voteFor = args.NodeId
+		reply.CurrTerm = node.currTerm
+		reply.Granted = true
 	}
+
+	return nil
 }
 
-func (node *Node) sendRequestVote(port int, args VoteReqArgs, reply *VoteReply) {
+func (node *Node) sendVoteReq(port int, args VoteReqArgs, reply *VoteReply) {
 
 	client, err := rpc.DialHTTP("tcp", "localhost:"+strconv.Itoa(port))
 	if err != nil {
@@ -39,38 +45,39 @@ func (node *Node) sendRequestVote(port int, args VoteReqArgs, reply *VoteReply) 
 	}
 	defer client.Close()
 
-	client.Call("Node.requestVoteRes", args, reply)
+	err = client.Call("Node.RequestVoteRes", args, reply)
 
-	if reply.currTerm > args.term {
-		node.currTerm = reply.currTerm
-		node.state = Candidate
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println("reply")
+	fmt.Println(reply)
+
+	if reply.Granted {
+		node.voteCount++
+		if node.voteCount >= len(node.peerList)/2+1 {
+			node.leaderChan <- true
+			node.voteCount = 0
+		}
+	} else {
+		node.currTerm = reply.CurrTerm
+		node.state = Follower
 		node.voteFor = -1
 		return
 	}
-
-	if reply.granted {
-		node.voteCount++
-	}
-
-	if node.voteCount >= len(node.peerList)/2+1 {
-		// incomplete - need to make channel for leader announcement
-	}
 }
 
-func (node *Node) requestVoteRes(args VoteReqArgs, reply *VoteReply) error {
-
-	if args.term < node.currTerm {
-		reply.currTerm = node.currTerm
-		reply.granted = false
-		return nil
+func (node *Node) broadcastVoteRequest() {
+	var args = VoteReqArgs{
+		Term:   node.currTerm + 1,
+		NodeId: node.nodeId,
 	}
 
-	if node.voteFor == -1 {
-		node.currTerm = args.term
-		node.voteFor = args.candidateId
-		reply.currTerm = node.currTerm
-		reply.granted = true
+	for i := range node.peerList {
+		go func(i int) {
+			var reply VoteReply
+			node.sendVoteReq(node.peerList[i], args, &reply)
+		}(i)
 	}
-
-	return nil
 }

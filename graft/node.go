@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
+	"strconv"
 	"time"
 )
 
@@ -26,6 +27,7 @@ type LogRecord struct {
 }
 
 type Node struct {
+	leaderChan       chan bool
 	state            int
 	peerList         []int
 	nodeId           int
@@ -51,27 +53,32 @@ func NodeConstructor(nodeId int, heartBeat int, peerList []int) Node {
 	node.running = true
 	node.peerList = peerList
 	node.numServers = len(peerList)
+	node.voteFor = -1
+	node.voteCount = 0
 	return node
 }
 
 func (node *Node) CloseServer(args *int, reply *int) error {
 	node.running = false
-	fmt.Println("SERVER CLOSED")
+	fmt.Println("SERVER CLOSED ", node.nodeId)
 	return nil
 }
 
 func (node *Node) runRPCListener() {
-	rpc.Register(node)
-	rpc.HandleHTTP()
-	listener, err := net.Listen("tcp", ":8080")
+	srv := rpc.NewServer()
+	srv.Register(node)
+	srv.HandleHTTP("/_goRPC_"+strconv.Itoa(node.peerList[node.nodeId-1]), "/debug/rpc"+strconv.Itoa(node.peerList[node.nodeId-1]))
+	//fmt.Println(":" + strconv.Itoa(node.peerList[node.nodeId-1]))
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(node.peerList[node.nodeId-1]))
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.Serve(listener, nil)
+	go http.Serve(listener, nil)
 }
 
 func (node *Node) runStateMachine() {
 	lastSetTime := time.Now()
+	//fmt.Println(node.peerList)
 	node.runRPCListener()
 	for node.running {
 		if node.state == Follower {
@@ -88,10 +95,27 @@ func (node *Node) runStateMachine() {
 			}
 		}
 		if node.state == Candidate {
+
 			fmt.Println(node.nodeId, " is requesting votes")
+			node.voteFor = node.nodeId
+			node.voteCount = 1
+			go node.broadcastVoteRequest()
+
+			select {
+			case <-time.After(4 * time.Second):
+				node.state = Follower
+			case <-node.leaderChan:
+				node.currTerm++
+				fmt.Printf("Node %d is elected leader\n", node.nodeId)
+			}
+
 		}
 		if node.state == Leader {
-			fmt.Println(node.nodeId, " is leader")
+			//fmt.Println(node.nodeId, " is leader")
+			if time.Since(lastSetTime) >= time.Second*time.Duration(node.heartbeatTimeout/2) {
+				lastSetTime = time.Now()
+				node.broadcastHeartBeat()
+			}
 		}
 	}
 }
