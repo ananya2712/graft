@@ -13,8 +13,8 @@ type VoteReqArgs struct {
 }
 
 type VoteReply struct {
-	CurrTerm int
-	Granted  bool
+	//CurrTerm int
+	Granted bool
 }
 
 type NewLeaderArgs struct {
@@ -22,34 +22,25 @@ type NewLeaderArgs struct {
 	Term     int
 }
 
-func (node *Node) NewLeader(args *NewLeaderArgs, reply *int) {
-	node.lock.Lock()
+func (node *Node) NewLeader(args NewLeaderArgs, reply *int) error {
 	node.state = Follower
-	node.currLeader = args.LeaderId
 	node.currTerm = args.Term
-	node.lock.Unlock()
+	return nil
 }
 
 func (node *Node) RequestVoteRes(args VoteReqArgs, reply *VoteReply) error {
 	fmt.Println(node.nodeId, args.NodeId, args.Term, node.currTerm, node.voteFor)
 	if args.Term < node.currTerm {
 		//fmt.Println("Inside cond 1")
-		reply.CurrTerm = node.currTerm
 		reply.Granted = false
 		return nil
-	} else {
-		node.lock.Lock()
-		node.state = Follower
-		node.lock.Unlock()
 	}
 
 	if node.voteFor == -1 {
 		//fmt.Println("Inside cond 2")
-		node.lock.Lock()
-		node.currTerm = args.Term
-		node.voteFor = args.NodeId
-		reply.CurrTerm = node.currTerm
 		reply.Granted = true
+		node.lock.Lock()
+		node.voteFor = args.NodeId
 		node.lock.Unlock()
 	}
 
@@ -66,20 +57,18 @@ func (node *Node) sendVoteReq(port int, args VoteReqArgs, reply *VoteReply) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println(node.nodeId, node.state)
+	fmt.Println(reply)
 
 	if reply.Granted {
 		node.voteCount++
 		fmt.Println(node.nodeId, " votes:", node.voteCount)
 		if node.voteCount >= len(node.peerList)/2+1 {
-			fmt.Println("Leader possible ", node.nodeId)
-			node.leaderChan <- true
+			//fmt.Println("Leader possible ", node.nodeId)
 			node.voteCount = 0
+			node.voteFor = -1
+			node.leaderChan <- true
 		}
-	} else {
-		node.currTerm = reply.CurrTerm
-		node.state = Follower
-		node.voteFor = -1
-		return
 	}
 }
 
@@ -90,9 +79,32 @@ func (node *Node) broadcastVoteRequest() {
 	}
 
 	for i := range node.peerList {
+		if true {
+			go func(i int) {
+				var reply VoteReply
+				node.sendVoteReq(node.peerList[i], args, &reply)
+			}(i)
+		}
+	}
+}
+
+func (node *Node) broadcastNewLeader() {
+	var args = NewLeaderArgs{
+		Term:     node.currTerm,
+		LeaderId: node.nodeId,
+	}
+	for i := range node.peerList {
 		go func(i int) {
-			var reply VoteReply
-			node.sendVoteReq(node.peerList[i], args, &reply)
+			var reply int
+			client, err := rpc.Dial("tcp", "localhost:"+strconv.Itoa(node.peerList[i]))
+			if err != nil {
+				log.Fatal("dialing:", err)
+			}
+			defer client.Close()
+			err = client.Call("Node.NewLeader", args, &reply)
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}(i)
 	}
 }

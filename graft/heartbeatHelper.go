@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/rpc"
 	"strconv"
@@ -33,15 +32,9 @@ func (node *Node) broadcastHeartBeat() {
 }
 
 func (node *Node) HeartBeat(args *HeartBeatArgs, reply *HeartBeatReply) error {
-	fmt.Println("Heartbeat receieved!", node.nodeId, " from ", args.CurrLeader, " ", args.CurrTerm)
-	reply.NodeId = node.nodeId
-	if args.CurrLeader == node.currLeader && args.CurrTerm == node.currTerm {
-		node.heartbeat = true
-		reply.Success = true
-	} else {
-		node.heartbeat = false
-		reply.Success = false
-	}
+	//fmt.Println("Heartbeat receieved!", node.nodeId, " from ", args.CurrLeader, " ", args.CurrTerm)
+	node.heartbeat <- true
+	node.currTerm = args.CurrTerm
 	return nil
 }
 

@@ -7,10 +7,13 @@ import (
 	"sync"
 )
 
+var cleader CurrentLeader
+
 func createCluster(n int, heartBeat int) {
 	var clusterwg sync.WaitGroup
 	var startPort int = 8080
 	var peerList []int
+	cleader = CurrentLeaderConstructor(1, 0)
 
 	for i := 1; i < n+1; i++ {
 		peerList = append(peerList, startPort+i)
@@ -18,8 +21,10 @@ func createCluster(n int, heartBeat int) {
 
 	for i := 0; i < n; i++ {
 		tempNode := NodeConstructor(i+1, heartBeat, peerList)
-
 		go tempNode.runStateMachine()
+		if i == 0 {
+			tempNode.state = Leader
+		}
 		clusterwg.Add(1)
 	}
 
