@@ -40,6 +40,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("Success: Server", *server, "closed")
 		return
 	}
 
@@ -49,7 +50,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(res)
+		fmt.Println("Current Value in the log:", res.LogValue)
 		return
 	}
 	if *send_val {
